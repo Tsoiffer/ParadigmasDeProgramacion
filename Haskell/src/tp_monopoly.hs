@@ -6,7 +6,7 @@ type Accion = (Persona -> Persona)
 
 data Persona = UnaPersona
   { nombre :: String,
-    dinero :: Int,
+    dinero :: Float,
     tactica :: String,
     propiedades :: [Propiedad],
     acciones :: [Accion]
@@ -16,6 +16,9 @@ data Persona = UnaPersona
 -- PROPIEDADES
 wilde :: Propiedad
 wilde = ("wilde", 200)
+
+chingolo :: Propiedad
+chingolo = ("chingolo", 330)
 
 recoleta :: Propiedad
 recoleta = ("recoleta", 550)
@@ -27,6 +30,9 @@ carolina = UnaPersona "Carolina" 500 "Accionista" [("capilla sixtina", 100), ("C
 manuel :: Persona
 manuel = UnaPersona "Manuel" 500 "Oferente singular" [("torre de pizza", 100)] [pasarPorElBanco, enojarse]
 
+tomas :: Persona
+tomas = UnaPersona "Tomas" 500 "Oferente singular" [("Casa Tomas", 100)] [pasarPorElBanco, enojarse, gritar, cobrarAlquileres, pagarAAccionistas, hacerBerrinchePor chingolo, subastar wilde]
+
 --FUNCIONES
 pasarPorElBanco :: Accion
 pasarPorElBanco jugador = jugador {tactica = "Comprador compulsivo", dinero = dinero jugador + 40}
@@ -37,14 +43,19 @@ enojarse jugador = jugador {acciones = acciones jugador ++ [gritar], dinero = di
 gritar :: Accion
 gritar jugador = jugador {nombre = "AHHHH" ++ nombre jugador}
 
-subastar :: Accion
-subastar jugador
-  | tactica jugador == "Oferente singular" = jugador {nombre = "AHHHH" ++ nombre jugador}
-  | tactica jugador == "Accionista" = jugador {nombre = "AHHHH" ++ nombre jugador}
+subastar :: Propiedad -> Accion
+subastar propiedad jugador
+  | tactica jugador == "Oferente singular" = jugador {dinero = (dinero jugador) - (snd propiedad), propiedades = (propiedades jugador) ++ [propiedad]}
+  | tactica jugador == "Accionista" = jugador {dinero = (dinero jugador) - (snd propiedad), propiedades = (propiedades jugador) ++ [propiedad]}
   | otherwise = jugador
 
 cobrarAlquileres :: Accion
-cobrarAlquileres jugador = jugador {dinero = dinero jugador + 10 * (sum . (map (ceiling . (/ 150) . snd)) $ (propiedades jugador))}
+cobrarAlquileres jugador = jugador {dinero = dinero jugador + 10 * sum (map barataOCara (propiedades jugador))}
+
+barataOCara :: Propiedad -> Float
+barataOCara (_, valor)
+  | valor > 150 = 2
+  | otherwise = 1
 
 pagarAAccionistas :: Accion
 pagarAAccionistas jugador
@@ -53,7 +64,7 @@ pagarAAccionistas jugador
 
 hacerBerrinchePor :: Propiedad -> Accion
 hacerBerrinchePor propiedad jugador
-  | fromIntegral (dinero jugador) >= (snd propiedad) = jugador
+  | (dinero jugador) >= (snd propiedad) = jugador {dinero = (dinero jugador) - (snd propiedad), propiedades = (propiedades jugador) ++ [propiedad]}
   | otherwise = (hacerBerrinchePor propiedad) . gritar $ (jugador {dinero = dinero jugador + 10})
 
 ultimaRonda :: Persona -> Accion
@@ -65,5 +76,5 @@ juegoFinal jugador1 jugador2
   | (dineroFinal jugador2) > (dineroFinal jugador1) = "Gano " ++ nombre jugador2 ++ "!"
   | otherwise = "Empate!"
 
-dineroFinal :: Persona -> Int
+dineroFinal :: Persona -> Float
 dineroFinal jugador = dinero . (ultimaRonda jugador) $ jugador
