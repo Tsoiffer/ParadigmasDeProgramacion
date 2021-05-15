@@ -35,46 +35,68 @@ tomas = UnaPersona "Tomas" 500 "Oferente singular" [("Casa Tomas", 100)] [pasarP
 
 --FUNCIONES
 pasarPorElBanco :: Accion
-pasarPorElBanco jugador = jugador {tactica = "Comprador compulsivo", dinero = dinero jugador + 40}
+pasarPorElBanco jugador = (editarTactica "Comprador compulsivo") . (editarDinero (+) 40) $ jugador
 
 enojarse :: Accion
-enojarse jugador = jugador {acciones = acciones jugador ++ [gritar], dinero = dinero jugador + 50}
+enojarse jugador = (sumarAcciones gritar) . (editarDinero (+) 50) $ jugador
 
 gritar :: Accion
-gritar jugador = jugador {nombre = "AHHHH" ++ nombre jugador}
+gritar jugador = editarNombre "AHHHH" jugador
 
 subastar :: Propiedad -> Accion
 subastar propiedad jugador
-  | tactica jugador == "Oferente singular" = jugador {dinero = (dinero jugador) - (snd propiedad), propiedades = (propiedades jugador) ++ [propiedad]}
-  | tactica jugador == "Accionista" = jugador {dinero = (dinero jugador) - (snd propiedad), propiedades = (propiedades jugador) ++ [propiedad]}
+  | tactica jugador == "Oferente singular" || tactica jugador == "Accionista" = comprarPropiedad propiedad jugador
   | otherwise = jugador
 
 cobrarAlquileres :: Accion
-cobrarAlquileres jugador = jugador {dinero = dinero jugador + 10 * sum (map barataOCara (propiedades jugador))}
-
-barataOCara :: Propiedad -> Float
-barataOCara (_, valor)
-  | valor > 150 = 2
-  | otherwise = 1
+cobrarAlquileres jugador = editarDinero (+) (dineroDeAlquileres (propiedades jugador)) jugador
 
 pagarAAccionistas :: Accion
 pagarAAccionistas jugador
-  | tactica jugador == "Accionista" = jugador {dinero = 200 + dinero jugador}
-  | otherwise = jugador {dinero = dinero jugador - 100}
+  | tactica jugador == "Accionista" = editarDinero (+) 200 jugador
+  | otherwise = editarDinero (-) 100 jugador
 
 hacerBerrinchePor :: Propiedad -> Accion
 hacerBerrinchePor propiedad jugador
-  | (dinero jugador) >= (snd propiedad) = jugador {dinero = (dinero jugador) - (snd propiedad), propiedades = (propiedades jugador) ++ [propiedad]}
-  | otherwise = (hacerBerrinchePor propiedad) . gritar $ (jugador {dinero = dinero jugador + 10})
+  | (dinero jugador) >= (snd propiedad) = comprarPropiedad propiedad jugador
+  | otherwise = (hacerBerrinchePor propiedad) . gritar $ editarDinero (+) 10 jugador
 
 ultimaRonda :: Persona -> Accion
 ultimaRonda jugador = foldl1 (.) (acciones jugador)
 
-juegoFinal :: Persona -> Persona -> String
+juegoFinal :: Persona -> Persona -> Persona
 juegoFinal jugador1 jugador2
-  | (dineroFinal jugador1) > (dineroFinal jugador2) = "Gano " ++ nombre jugador1 ++ "!"
-  | (dineroFinal jugador2) > (dineroFinal jugador1) = "Gano " ++ nombre jugador2 ++ "!"
-  | otherwise = "Empate!"
+  | (dineroFinal jugador1) > (dineroFinal jugador2) = jugador1
+  | otherwise = jugador2
+
+--Funciones Auxiliares
+
+dineroDeAlquileres :: [Propiedad] -> Float
+dineroDeAlquileres propiedadesDelJugador = sum (map barataOCara propiedadesDelJugador)
+
+barataOCara :: Propiedad -> Float
+barataOCara (_, valor)
+  | valor > 150 = 2 * 10
+  | otherwise = 1 * 10
+
+comprarPropiedad :: Propiedad -> Persona -> Persona
+comprarPropiedad propiedad jugador = (sumarPropiedad propiedad) . (editarDinero (-) (snd propiedad)) $ jugador
 
 dineroFinal :: Persona -> Float
 dineroFinal jugador = dinero . (ultimaRonda jugador) $ jugador
+
+--Mappers
+editarTactica :: String -> Persona -> Persona
+editarTactica nuevaTactica jugador = jugador {tactica = nuevaTactica}
+
+editarDinero :: (Float -> Float -> Float) -> Float -> Persona -> Persona
+editarDinero funcion diferencia jugador = jugador {dinero = funcion (dinero jugador) diferencia}
+
+sumarAcciones :: Accion -> Persona -> Persona
+sumarAcciones accion jugador = jugador {acciones = (:) accion (acciones jugador)}
+
+editarNombre :: String -> Persona -> Persona
+editarNombre prefijo jugador = jugador {nombre = prefijo ++ (nombre jugador)}
+
+sumarPropiedad :: Propiedad -> Persona -> Persona
+sumarPropiedad nuevaPropiedad jugador = jugador {propiedades = (:) nuevaPropiedad (propiedades jugador)}
