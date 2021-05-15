@@ -44,14 +44,14 @@ gritar :: Accion
 gritar jugador = editarNombre "AHHHH" jugador
 
 subastar :: Propiedad -> Accion
-subastar propiedad jugador = verificacion propiedad jugador (tactica jugador == "Oferente singular" || tactica jugador == "Accionista") jugador
+subastar propiedad jugador = verificacion propiedad jugador (tactica jugador == "Oferente singular" || esAccionista jugador) jugador
 
 cobrarAlquileres :: Accion
 cobrarAlquileres jugador = editarDinero (+) (dineroDeAlquileres (propiedades jugador)) jugador
 
 pagarAAccionistas :: Accion
 pagarAAccionistas jugador
-  | tactica jugador == "Accionista" = editarDinero (+) 200 jugador
+  | esAccionista jugador = editarDinero (+) 200 jugador
   | otherwise = editarDinero (-) 100 jugador
 
 hacerBerrinchePor :: Propiedad -> Accion
@@ -69,6 +69,9 @@ juegoFinal jugador1 jugador2
 
 dineroDeAlquileres :: [Propiedad] -> Float
 dineroDeAlquileres propiedadesDelJugador = sum (map barataOCara propiedadesDelJugador)
+
+esAccionista :: Persona -> Bool
+esAccionista jugador = tactica jugador == "Accionista"
 
 barataOCara :: Propiedad -> Float
 barataOCara (_, valor)
