@@ -72,8 +72,8 @@ dineroDeAlquileres propiedadesDelJugador = sum (map barataOCara propiedadesDelJu
 
 barataOCara :: Propiedad -> Float
 barataOCara (_, valor)
-  | valor > 150 = 2 * 10
-  | otherwise = 1 * 10
+  | valor > 150 = 20
+  | otherwise = 10
 
 comprarPropiedad :: Propiedad -> Persona -> Persona
 comprarPropiedad propiedad jugador = (sumarPropiedad propiedad) . (editarDinero (-) (snd propiedad)) $ jugador
