@@ -44,9 +44,7 @@ gritar :: Accion
 gritar jugador = editarNombre "AHHHH" jugador
 
 subastar :: Propiedad -> Accion
-subastar propiedad jugador
-  | tactica jugador == "Oferente singular" || tactica jugador == "Accionista" = comprarPropiedad propiedad jugador
-  | otherwise = jugador
+subastar propiedad jugador = verificacion propiedad jugador (tactica jugador == "Oferente singular" || tactica jugador == "Accionista") jugador
 
 cobrarAlquileres :: Accion
 cobrarAlquileres jugador = editarDinero (+) (dineroDeAlquileres (propiedades jugador)) jugador
@@ -57,9 +55,7 @@ pagarAAccionistas jugador
   | otherwise = editarDinero (-) 100 jugador
 
 hacerBerrinchePor :: Propiedad -> Accion
-hacerBerrinchePor propiedad jugador
-  | (dinero jugador) >= (snd propiedad) = comprarPropiedad propiedad jugador
-  | otherwise = (hacerBerrinchePor propiedad) . gritar $ editarDinero (+) 10 jugador
+hacerBerrinchePor propiedad jugador = verificacion propiedad jugador ((dinero jugador) >= (snd propiedad)) (continuarConBerrinche propiedad jugador)
 
 ultimaRonda :: Persona -> Accion
 ultimaRonda jugador = foldl1 (.) (acciones jugador)
@@ -81,6 +77,14 @@ barataOCara (_, valor)
 
 comprarPropiedad :: Propiedad -> Persona -> Persona
 comprarPropiedad propiedad jugador = (sumarPropiedad propiedad) . (editarDinero (-) (snd propiedad)) $ jugador
+
+continuarConBerrinche :: Propiedad -> Accion
+continuarConBerrinche propiedad jugador = (hacerBerrinchePor propiedad) . gritar $ editarDinero (+) 10 jugador
+
+verificacion :: Propiedad -> Persona -> Bool -> Persona -> Persona
+verificacion propiedad jugador condicion otroCaso
+  | condicion = comprarPropiedad propiedad jugador
+  | otherwise = otroCaso
 
 dineroFinal :: Persona -> Float
 dineroFinal jugador = dinero . (ultimaRonda jugador) $ jugador
