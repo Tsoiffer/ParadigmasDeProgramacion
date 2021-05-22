@@ -79,7 +79,7 @@ barataOCara (_, valor)
   | otherwise = 10
 
 comprarPropiedad :: Propiedad -> Persona -> Persona
-comprarPropiedad propiedad jugador = sumarPropiedad (++ [propiedad]) . (editarDinero ((-) . snd $propiedad)) $ jugador
+comprarPropiedad propiedad jugador = editarPropiedades (++ [propiedad]) . (editarDinero ((-) . snd $propiedad)) $ jugador
 
 continuarConBerrinche :: Propiedad -> Accion
 continuarConBerrinche propiedad jugador = (hacerBerrinchePor propiedad) . gritar $ editarDinero (+ 10) jugador
@@ -105,5 +105,5 @@ editarAcciones funcion jugador = jugador {acciones = funcion . acciones $ jugado
 editarNombre :: (String -> String) -> Persona -> Persona
 editarNombre funcion jugador = jugador {nombre = funcion . nombre $ jugador}
 
-sumarPropiedad :: ([Propiedad] -> [Propiedad]) -> Persona -> Persona
-sumarPropiedad funcion jugador = jugador {propiedades = funcion . propiedades $ jugador}
+editarPropiedades :: ([Propiedad] -> [Propiedad]) -> Persona -> Persona
+editarPropiedades funcion jugador = jugador {propiedades = funcion . propiedades $ jugador}
