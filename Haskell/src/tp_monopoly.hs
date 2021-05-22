@@ -35,24 +35,24 @@ tomas = UnaPersona "Tomas" 500 "Oferente singular" [("Casa Tomas", 100)] [pasarP
 
 --FUNCIONES
 pasarPorElBanco :: Accion
-pasarPorElBanco jugador = (editarTactica "Comprador compulsivo") . (editarDinero (+) 40) $ jugador
+pasarPorElBanco jugador = editarTactica (const "Comprador compulsivo") . (editarDinero (+ 40)) $ jugador
 
 enojarse :: Accion
-enojarse jugador = (sumarAcciones gritar) . (editarDinero (+) 50) $ jugador
+enojarse jugador = editarAcciones (++ [gritar]) . (editarDinero (+ 50)) $ jugador
 
 gritar :: Accion
-gritar jugador = editarNombre "AHHHH" jugador
+gritar jugador = editarNombre (\nombreJgador -> "AHHHH" ++ nombreJgador) jugador
 
 subastar :: Propiedad -> Accion
 subastar propiedad jugador = verificacion propiedad jugador (tactica jugador == "Oferente singular" || esAccionista jugador) jugador
 
 cobrarAlquileres :: Accion
-cobrarAlquileres jugador = editarDinero (+) (dineroDeAlquileres (propiedades jugador)) jugador
+cobrarAlquileres jugador = editarDinero (+ (dineroDeAlquileres . propiedades $jugador)) jugador
 
 pagarAAccionistas :: Accion
 pagarAAccionistas jugador
-  | esAccionista jugador = editarDinero (+) 200 jugador
-  | otherwise = editarDinero (-) 100 jugador
+  | esAccionista jugador = editarDinero (+ 200) jugador
+  | otherwise = editarDinero (\numero -> numero - 100) jugador
 
 hacerBerrinchePor :: Propiedad -> Accion
 hacerBerrinchePor propiedad jugador = verificacion propiedad jugador ((dinero jugador) >= (snd propiedad)) (continuarConBerrinche propiedad jugador)
@@ -79,10 +79,10 @@ barataOCara (_, valor)
   | otherwise = 10
 
 comprarPropiedad :: Propiedad -> Persona -> Persona
-comprarPropiedad propiedad jugador = (sumarPropiedad propiedad) . (editarDinero (-) (snd propiedad)) $ jugador
+comprarPropiedad propiedad jugador = sumarPropiedad (++ [propiedad]) . (editarDinero ((-) . snd $propiedad)) $ jugador
 
 continuarConBerrinche :: Propiedad -> Accion
-continuarConBerrinche propiedad jugador = (hacerBerrinchePor propiedad) . gritar $ editarDinero (+) 10 jugador
+continuarConBerrinche propiedad jugador = (hacerBerrinchePor propiedad) . gritar $ editarDinero (+ 10) jugador
 
 verificacion :: Propiedad -> Persona -> Bool -> Persona -> Persona
 verificacion propiedad jugador condicion otroCaso
@@ -93,17 +93,17 @@ dineroFinal :: Persona -> Float
 dineroFinal jugador = dinero . (ultimaRonda jugador) $ jugador
 
 --Mappers
-editarTactica :: String -> Persona -> Persona
-editarTactica nuevaTactica jugador = jugador {tactica = nuevaTactica}
+editarTactica :: (String -> String) -> Persona -> Persona
+editarTactica funcion jugador = jugador {tactica = funcion . tactica $ jugador}
 
-editarDinero :: (Float -> Float -> Float) -> Float -> Persona -> Persona
-editarDinero funcion diferencia jugador = jugador {dinero = funcion (dinero jugador) diferencia}
+editarDinero :: (Float -> Float) -> Persona -> Persona
+editarDinero funcion jugador = jugador {dinero = funcion . dinero $ jugador}
 
-sumarAcciones :: Accion -> Persona -> Persona
-sumarAcciones accion jugador = jugador {acciones = (:) accion (acciones jugador)}
+editarAcciones :: ([Accion] -> [Accion]) -> Persona -> Persona
+editarAcciones funcion jugador = jugador {acciones = funcion . acciones $ jugador}
 
-editarNombre :: String -> Persona -> Persona
-editarNombre prefijo jugador = jugador {nombre = prefijo ++ (nombre jugador)}
+editarNombre :: (String -> String) -> Persona -> Persona
+editarNombre funcion jugador = jugador {nombre = funcion . nombre $ jugador}
 
-sumarPropiedad :: Propiedad -> Persona -> Persona
-sumarPropiedad nuevaPropiedad jugador = jugador {propiedades = (:) nuevaPropiedad (propiedades jugador)}
+sumarPropiedad :: ([Propiedad] -> [Propiedad]) -> Persona -> Persona
+sumarPropiedad funcion jugador = jugador {propiedades = funcion . propiedades $ jugador}
