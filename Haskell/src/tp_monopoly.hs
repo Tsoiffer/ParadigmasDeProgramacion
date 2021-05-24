@@ -52,7 +52,7 @@ cobrarAlquileres jugador = editarDinero (+ (dineroDeAlquileres . propiedades $ju
 pagarAAccionistas :: Accion
 pagarAAccionistas jugador
   | esAccionista jugador = editarDinero (+ 200) jugador
-  | otherwise = editarDinero (\numero -> numero - 100) jugador
+  | otherwise = editarDinero (subtract 100) jugador
 
 hacerBerrinchePor :: Propiedad -> Accion
 hacerBerrinchePor propiedad jugador = verificacion propiedad jugador ((dinero jugador) >= (snd propiedad)) (continuarConBerrinche propiedad jugador)
