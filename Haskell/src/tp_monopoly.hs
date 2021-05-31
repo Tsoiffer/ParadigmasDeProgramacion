@@ -41,7 +41,7 @@ enojarse :: Accion
 enojarse jugador = editarAcciones (++ [gritar]) . (editarDinero (+ 50)) $ jugador
 
 gritar :: Accion
-gritar jugador = editarNombre (\nombreJgador -> "AHHHH" ++ nombreJgador) jugador
+gritar jugador = editarNombre ("AHHHH" ++) jugador
 
 subastar :: Propiedad -> Accion
 subastar propiedad jugador = verificacion propiedad jugador (tactica jugador == "Oferente singular" || esAccionista jugador) jugador
