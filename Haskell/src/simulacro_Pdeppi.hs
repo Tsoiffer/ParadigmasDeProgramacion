@@ -106,7 +106,6 @@ aplicarDescuentos unaPersona unaComida = foldl1 (.) (cupones unaPersona) $ unaCo
 superComida :: [Comida] -> Comida
 superComida conjuntoDeComidas = UnaComida (nombreSuperComida conjuntoDeComidas) (costoSuperComida conjuntoDeComidas) (ingredientesSuperComida conjuntoDeComidas)
 
---No llege a completar las funciones pero cada uno devolveria lo que solicita la consigna
 nombreSuperComida :: [Comida] -> String
 nombreSuperComida listaDeComidas = sacarVocales . concat . map nombreComida $ listaDeComidas
 

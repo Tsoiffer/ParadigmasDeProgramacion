@@ -28,6 +28,9 @@ astro = Barbaro "Astro" 100 ["tejer", "escribirPoesia"] [ardilla, varitasDefectu
 espada :: Float -> Objeto
 espada peso = editarFuerza (+ 2 * peso)
 
+amuletoMistico :: String -> Objeto
+amuletoMistico unaHailidad = editarHbilidades (++ [unaHailidad])
+
 varitasDefectuosas :: Objeto
 varitasDefectuosas = editarHbilidades (++ ["hacer magia"]) . editarObjetos (const [])
 
