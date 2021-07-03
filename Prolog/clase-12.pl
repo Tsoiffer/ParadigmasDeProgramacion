@@ -118,3 +118,19 @@ esLibro(Obra) :-
 
 esObra(Obra) :-
     escribio(_, Obra).
+
+/*5. Queremos saber si una obra es rioplatense, que es cuando la nacionalidad de su autor/a es Uruguay o Argentina. */
+
+nacionalidad(elsaBornemann, argentina).
+nacionalidad(jorgeLuisBorges, argentina).
+nacionalidad(joseHernandez, argentina).
+nacionalidad(julioCortazar, argentina).
+nacionalidad(horacioQuiroga, uruguay).
+
+esObraRioplatense(Obra) :-
+    escribio(Obra,Artista),
+    nacionalidad(Artista,argentina).
+
+esObraRioplatense(Obra) :-
+    escribio(Obra,Artista),
+    nacionalidad(Artista,uruguay).
