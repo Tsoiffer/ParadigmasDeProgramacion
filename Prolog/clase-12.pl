@@ -80,7 +80,6 @@ copiasVendidas(yoRobot, 30000).
 copiasVendidas(elFinDeLaEternidad, 30000).
 copiasVendidas(laBusquedaDeLosElementos, 40000).
 copiasVendidas(martinFierro, 50000).
-copiasVendidas(it, 60000).
 copiasVendidas(it, 70000).
 copiasVendidas(misery, 70000).
 copiasVendidas(carrie, 80000).
@@ -95,9 +94,9 @@ esBestSeller(Obra) :-
     copiasVendidas(Obra, Cantidad),
     Cantidad > 50000.
 
-esReincidente(Autore) :-
-    escribio(Autore, UnaObra),
-    escribio(Autore, OtraObra),
+esReincidente(Autor) :-
+    escribio(Autor, UnaObra),
+    escribio(Autor, OtraObra),
     UnaObra \= OtraObra.
 
 convieneContratar(Artista) :-
@@ -125,12 +124,168 @@ nacionalidad(elsaBornemann, argentina).
 nacionalidad(jorgeLuisBorges, argentina).
 nacionalidad(joseHernandez, argentina).
 nacionalidad(julioCortazar, argentina).
-nacionalidad(horacioQuiroga, uruguay).
+nacionalidad(horacioQuiroga, uruguaya).
 
+
+
+%esta manera lo hizo yo 
 esObraRioplatense(Obra) :-
-    escribio(Obra,Artista),
+    escribio(Artista,Obra),
     nacionalidad(Artista,argentina).
 
 esObraRioplatense(Obra) :-
-    escribio(Obra,Artista),
-    nacionalidad(Artista,uruguay).
+    escribio(Artista,Obra),
+    nacionalidad(Artista,uruguaya).
+
+%Es mejor hacerlo para no repetir logica%
+
+esAutorRioPlatense(Autor):-
+    nacionalidad(Autor,argentina).
+
+esAutorRioPlatense(Autor):-
+    nacionalidad(Autor,uruguaya).
+
+esObraRioplatenseMejor(Obra) :-
+    escribio(Autor,Obra),
+    esAutorRioPlatense(Autor).
+
+
+%para todo%
+%forall(PARAMETRO1 , PARAMETRO2)%
+
+soloEscribioComics(Autor):-
+    escribio(Autor,_), %no hay que ligar la obra por que si no pregunta cada obra antes de entrar%
+    %utilizamos escribio antes para cotar el dominio%
+    forall(escribio(Autor,Obra),esComic(Obra)). %los forall no ligan, es de orden superior%
+
+
+%individuos complejos%
+%functores de tipo de libro
+%esDeTipo
+esDeTipo(it, novela(terror, 11)).
+esDeTipo(misery, novela(terror, 20)).
+esDeTipo(carrie, novela(terror, 30)).
+esDeTipo(cuentosDeLaSelva, libroDeCuentos(11)).
+esDeTipo(elUniversoEnUnaTabla, cientifico(quimica)).
+esDeTipo(elUltimoTeoremaDeFermat, cientifico(matematica)).
+esDeTipo(yoRobot, bestSeller(10,253)).
+esDeTipo(sandman, fantastica([yelmo, bolsaDeArena, rubi])).
+
+/*
+estaBuena(Obra):-
+    esDeTipo(Obra,novela(terror, _)).
+
+estaBuena(Obra):-
+    esDeTipo(Obra,novela(policial, Capitulos)),
+    Capitulos<12.
+
+estaBuena(Obra):-
+    esDeTipo(Obra,libroDeCuentos(Capitulos)),
+    Capitulos>10.
+
+estaBuena(Obra):-
+    esDeTipo(Obra,cientifico(fisicaCuantica)).
+
+estaBuena(Obra):-
+    esDeTipo(Obra,bestSeller(PrecioPorPagina,_)),
+    PrecioPorPagina < 50.*/
+
+%mejora de no repetir logica de "esDeTipo" y de es "novela"%
+/*
+estaBuena(Obra):-
+    esDeTipo(Obra,Tipo),
+    obraBuenaPorTipo(Tipo).
+
+obraBuenaPorTipo(novela(Genero, Capitulos)):-
+    novelaBuena(Genero, Capitulos).
+
+novelaBuena(terror,_).
+
+novelaBuena(policial,Capitulos):-
+    Capitulos<12.
+
+obraBuenaPorTipo(libroDeCuentos(Capitulos)):-
+    Capitulos>10.
+
+obraBuenaPorTipo(bestSeller(PrecioTotal,CantidadDePaginas)):-
+    PrecioTotal / CantidadDePaginas < 50.
+*/
+estaBuena(Obra):-
+    esDeTipo(Obra , TipoDeObra),
+    tipoDeObraBueno(TipoDeObra).
+
+tipoDeObraBueno(novela(policial , Capitulos)):-
+    Capitulos<12.
+tipoDeObraBueno(novela(terror , _)).
+
+tipoDeObraBueno(libroDeCuentos(CantidadDeCuentos)):-
+    CantidadDeCuentos>10.
+
+tipoDeObraBueno(cientifico(fisicaCuantica)).
+
+tipoDeObraBueno(bestSeller(PrecioPorPagina , _)):-
+    PrecioPorPagina<50.
+
+
+cantidadDePaginas(Obra,Paginas):-
+    esDeTipo(Obra , TipoDeObra),
+    paginasPorTipo(TipoDeObra,Paginas). %POLIMORFISMO%
+
+
+paginasPorTipo(novela(_,Capitulos),Paginas):-
+    Paginas is (Capitulos * 20).
+
+paginasPorTipo(libroDeCuentos(Cuento),Paginas):-
+    Paginas is (Cuento * 5).
+
+paginasPorTipo(cientifico(_),1000).
+
+paginasPorTipo(bestSeller(_ , CantidadDePaginas),CantidadDePaginas).
+
+% "is" liga un valor, es como el "=" pero se usa cuando hay una cuenta del otro lado. Tiene q haber una operacion aritmetica%
+
+
+tienePuntaje(Autor,Puntaje):-
+    cantidadObrasBestSellerQueEscribio(Autor,Cantidad),
+    Puntaje is 3 * Cantidad.
+
+escribioBestSeller(Autor,Obra):-
+    escribio(Autor,Obra),
+    esBestSeller(Obra).
+
+cantidadObrasBestSellerQueEscribio(Autor,Cantidad):-
+    obrasBetsellerQueEscribio(Autor,Betsellers),
+    %length viene pre definido: length(LISTA,CANTIDAD(De elementos de la lista)).
+    length(Betsellers,Cantidad).
+
+obrasBetsellerQueEscribio(Autor,Betsellers):-
+    escribio(Autor,_),
+    %findall(ELEMENTOS(que guardamos en la lista), CONDICION , LISTA)
+    findall(Obra,escribioBestSeller(Autor,Obra),Betsellers).
+
+obrasBetsellerQueLeGustanAGus(Obras) :-
+    findall(Obra,leGustaAGusBetseller(Obra),Obras).
+
+leGustaAGusBetseller(Obra):-
+    leGustaAGus(Obra),
+    esBestSeller(Obra).
+
+%se incorpora un nuevo tipo de obra: frantastica(ElementosMagicos)
+%queremos ver si la obra fantastica es copada. esto ocurre cuando uno de sus elementos es un "rubi"
+%por ejemplo tenemos: esDeTipo(sandman,fantasia[yelmo,bolsaDeArena,rubi])
+
+tipoDeObraBueno(fantastica(ElementosMagicos)):-
+    %member(ELEMENTO,LISTA) funciona como el ELEM
+    member(rubi,ElementosMagicos).
+
+promedioDeCopiaVendidas(Autor,Promedio):-
+    escribio(Autor,_), 
+    findall(Copias,ventasDeUnaObraDeUnAutor(Autor,Copias),ListaDeCopias),
+    length(ListaDeCopias,Cantidad),
+    %sum_list(LISTA,SUMATORIA) funciona como el SUM
+    sum_list(ListaDeCopias, TotalDeCopiasVendidas),    
+    Promedio is TotalDeCopiasVendidas / Cantidad.
+
+ventasDeUnaObraDeUnAutor(Autor,Cantidad):-
+    escribio(Autor,Obra),
+    copiasVendidas(Obra,Cantidad).

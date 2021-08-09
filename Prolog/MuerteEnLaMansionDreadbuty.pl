@@ -1,35 +1,32 @@
 %Base de Conocimiento%
 
-%se crea es Persona para generar un dominio que haga a Charles inversible%
-esPersona(milhouse).
-esPersona(Persona) :-
-    viveEnLaMansion(Persona).
 
 viveEnLaMansion(charles).
 viveEnLaMansion(aghata).
 viveEnLaMansion(mayordomo).
 
 
-odia(charles,Odiados) :-
-    esPersona(Odiados), %sumo el dominio esPersona para que sea inversible %
-    not(odia(aghata,Odiados)).
+odia(charles,Odiado) :-
+    viveEnLaMansion(Odiado),
+    not(odia(aghata,Odiado)).
 
-odia(aghata,Odiados) :-
-    viveEnLaMansion(Odiados),
-    Odiados \= mayordomo.
+odia(aghata,Odiado) :-
+    viveEnLaMansion(Odiado),
+    Odiado \= mayordomo.
 
-odia(mayordomo,Odiados) :-
-    odia(aghata,Odiados).
+odia(mayordomo,Odiado) :-
+    odia(aghata,Odiado).
 
 esMasRicoQue(aghata,Persona) :-
-    not(odia(mayordomo,Persona)),
-    viveEnLaMansion(Persona).
+    viveEnLaMansion(Persona),
+    not(odia(mayordomo,Persona)).
+
 
 
 matoA(Victima,Asesino) :-
-    odia(Asesino,Victima),
     viveEnLaMansion(Asesino),
-    esMasRicoQue(Victima,Asesino).
+    odia(Asesino,Victima),
+    not(esMasRicoQue(Victima,Asesino)).
 
 /*
 1-A)El programa debe resolver el problema de quién mató a la tía Agatha. 
@@ -38,7 +35,7 @@ matoA(Victima,Asesino) :-
 1-B)Mostrar la consulta utilizada y la respuesta obtenida.
 
 1 ?- matoA(aghata,Asesino).
-Asesino = mayordomo.
+Asesino = aghata.
 */
 
 /*
@@ -50,39 +47,41 @@ Mostrar las consultas utilizadas para conseguir lo anterior, junto con las respu
 - Si existe alguien que odie a milhouse.
 Existe Alguien?:
 ?- odia(_,milhouse). 
-true .
+false.
 
 Quien?:
 ?- odia(Odiador,milhouse). 
-Odiador = charles ;
 false.
 */
 
 /*
 - A quién odia charles.
-?- odia(charles,Odiados).
-Odiados = mayordomo.
+?- odia(charles,Odiado).
+Odiado = mayordomo.
 */
 /*
 - El nombre de quien odia a tía Ágatha.
-?- odia(aghata,Odiados).  
-Odiados = charles ;
-Odiados = aghata ;
+?- odia(aghata,Odiado).  
+Odiado = charles ;
+Odiado = aghata ;
 */
 /*
-- Todos los odiadores y sus odiados.
-?- odia(Odiadores,Odiados).
+- Todos los odiadores y sus Odiado.
+?- odia(aghata,Odiado). 
+Odiado = charles ;
+Odiado = aghata ;
+false.
+
+11 ?- odia(Odiadores,Odiado).
 Odiadores = charles,
-Odiados = milhouse ;
-Odiadores = charles,
-Odiados = mayordomo ;
+Odiado = mayordomo ;
 Odiadores = aghata,
-Odiados = charles ;
-Odiadores = Odiados, Odiados = aghata ;
+Odiado = charles ;
+Odiadores = Odiado, Odiado = aghata ;
 Odiadores = mayordomo,
-Odiados = charles ;
+Odiado = charles ;
 Odiadores = mayordomo,
-Odiados = aghata ;
+Odiado = aghata ;
 false.
 */
 /*
@@ -92,8 +91,8 @@ Existe Alguien?:
 true .
 
 Quien?:
-?- odia(mayordomo,Odiados). 
-Odiados = charles ;
-Odiados = aghata ;
+?- odia(mayordomo,Odiado). 
+Odiado = charles ;
+Odiado = aghata ;
 false.
 */
